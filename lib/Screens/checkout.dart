@@ -35,7 +35,7 @@ class CheckOut extends StatelessWidget {
                       children: [
                         Text( '${aaa?.selectedProdcts[index].price} \$ - ${aaa?.selectedProdcts[index].location}'),
 
-
+//
                       ],
                     ),
                      leading: CircleAvatar(backgroundImage:  NetworkImage(aaa?.selectedProdcts[index].img)),

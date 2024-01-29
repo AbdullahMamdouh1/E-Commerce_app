@@ -1,5 +1,6 @@
 import 'package:abdullah1/Provider/Cart.dart';
 import 'package:abdullah1/Screens/details_screen.dart';
+import 'package:abdullah1/Screens/profile.dart';
 import 'package:abdullah1/widget/Appbar.dart';
 import 'package:abdullah1/widget/Item.dart';
 import 'package:abdullah1/widget/color.dart';
@@ -16,12 +17,13 @@ class Home extends StatelessWidget {
 
 
 
-  const Home({Key? key, }) : super(key: key);
+    Home({Key? key, }) : super(key: key);
 
 
 
   @override
   Widget build(BuildContext context) {
+   final userr = FirebaseAuth.  instance.currentUser!;
 
 
     return Scaffold(
@@ -32,15 +34,15 @@ class Home extends StatelessWidget {
           children: [
             Column(
               children: [
-                const UserAccountsDrawerHeader(
-                    decoration: BoxDecoration(
+                UserAccountsDrawerHeader(
+                    decoration: const BoxDecoration(
                         image: DecorationImage(
                             image: AssetImage('assets/image2.jpg'))),
                     currentAccountPicture: CircleAvatar(
                         radius: 55,
-                        backgroundImage: AssetImage('assets/image1.jpg')),
+                        backgroundImage:  NetworkImage("${userr.photoURL}")  ),
                     accountName: Text('Abdullah Mamdouh'),
-                    accountEmail: Text('abdullah240@gmaile.com')),
+                    accountEmail: Text('${userr.email}')),
                 const ListTile(
                   title: Text('Home'),
                   leading: Icon(Icons.home,color: purple),
@@ -53,6 +55,21 @@ class Home extends StatelessWidget {
                   title: Text(' About'),
                   leading: Icon(Icons.help,color: purple),
                 ),
+
+
+                ListTile(
+                    title: Text("Profile Page"),
+                    leading: Icon(Icons.person,color: blue),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfilePage(),
+                        ),
+                      );
+                    }),
+
+
                 ListTile(
                   title: const Text(' Logout'),
                   leading: const Icon(Icons.exit_to_app,color: purple),
@@ -154,7 +171,7 @@ class Home extends StatelessWidget {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
-                            child: Text('${Item[index].name}',style: const TextStyle(fontSize: 15,fontWeight:FontWeight.bold,color: Colors.black45 )),
+                            child: Text('${Item[index].name}',style: const TextStyle(fontSize: 12,fontWeight:FontWeight.bold,color: Colors.black45 )),
                           ),
                           const SizedBox (height: 3),
                           Text('${Item[index].price} \$',

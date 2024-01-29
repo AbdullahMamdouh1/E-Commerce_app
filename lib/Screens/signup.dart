@@ -1,7 +1,10 @@
+import 'package:abdullah1/Screens/Home.dart';
 import 'package:abdullah1/Screens/Login.dart';
+import 'package:abdullah1/Screens/verify_email.dart';
 import 'package:abdullah1/widget/color.dart';
 import 'package:abdullah1/widget/formtext.dart';
 import 'package:abdullah1/widget/snackBar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +19,7 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final userNemeController = TextEditingController();
   final formKey = GlobalKey<FormState>();
   bool isLoading = false;
   bool isSee = true;
@@ -24,14 +28,6 @@ class _RegisterState extends State<Register> {
   bool inPasswordupp = false;
   bool inPasswordlow = false;
   bool inPasswordspec = false;
-
-
-
-
-
-
-
-
 
 //     1
   onPasswordChanged(String password) {
@@ -88,20 +84,33 @@ class _RegisterState extends State<Register> {
       isLoading = true;
     });
 
-
-
-
-
-
-
-
-
     try {
       final credential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
+
+      CollectionReference users =
+          FirebaseFirestore.instance.collection('usersss');
+
+      users
+          .doc(credential.user!.uid)
+          .set({
+        'username': userNemeController.text,
+
+
+          })
+          .then((value) => print("User Added"))
+          .catchError((error) => print("Failed to add user: $error"));
+
+
+
+
+
+
+
+
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         // print('The password provided is too weak.');
@@ -154,6 +163,7 @@ class _RegisterState extends State<Register> {
                   child: Column(
                     children: [
                       FromText(
+                        controllerr:userNemeController ,
                         ispassword: true,
                         TextInputTypeee: TextInputType.text,
                         labelTextr: 'enter your username',
@@ -165,6 +175,7 @@ class _RegisterState extends State<Register> {
                               color: Colors.white,
                             )),
                       ),
+
                       SizedBox(
                         height: 30,
                       ),
@@ -194,12 +205,15 @@ class _RegisterState extends State<Register> {
                       ),
                       FromText(
                         validator: (value) {
-                          if
-                          (  (value.contains(RegExp(r'.{8,}'))) && (value.contains(RegExp(r'(?=.*?[0-9])'))) &&( (value.contains(RegExp(r'[!@#\$&*~]')))    ) &&  (value.contains(RegExp(r'[Q,W,E,R,T,Y,U,I,O,P,A,S,D,F,G,H,J,K,L,Z,X,C,V,B,N,M,]')))  && (value.contains(RegExp(r'[q,w,e,r,t,y,u,i,o,p,a,s,d,f,g,h,j,k,l,z,x,c,v,b,n,m,]'))) ) {
-
-                              return null;
-                            }
-                            else {
+                          if ((value.contains(RegExp(r'.{8,}'))) &&
+                              (value.contains(RegExp(r'(?=.*?[0-9])'))) &&
+                              ((value.contains(RegExp(r'[!@#\$&*~]')))) &&
+                              (value.contains(RegExp(
+                                  r'[Q,W,E,R,T,Y,U,I,O,P,A,S,D,F,G,H,J,K,L,Z,X,C,V,B,N,M,]'))) &&
+                              (value.contains(RegExp(
+                                  r'[q,w,e,r,t,y,u,i,o,p,a,s,d,f,g,h,j,k,l,z,x,c,v,b,n,m,]')))) {
+                            return null;
+                          } else {
                             return 'Enter at least 8 characters';
                           }
                         },
@@ -366,21 +380,17 @@ class _RegisterState extends State<Register> {
                       Container(
                         width: 350,
                         child: ElevatedButton(
-                            onPressed: () async{
+                            onPressed: () async {
                               if (formKey.currentState!.validate()) {
+                                await register();
 
-                               await register();
+                                if (!mounted) return;
 
-                               if (!mounted)return;
-
-
-                                 Navigator.pushReplacement(
-                                   context,
-                                   MaterialPageRoute(
-                                     builder: (context) => Login(),
-                                   ));
-
-
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Home()                // VerifyEmailPage(),
+                                    ));
                               } else {
                                 showSnackBar(context, 'Error');
                               }
@@ -409,20 +419,11 @@ class _RegisterState extends State<Register> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-
-                         TextButton(onPressed: ( ){
-
-                           inPasswordlow? false:  Navigator.pushReplacement(
-                               context,
-                               MaterialPageRoute(
-                                 builder: (context) => Login(),
-                               ));
-
-
-                         }, child:  Text(
-                           'Do have an account?',
-                           style: TextStyle(fontSize: 20),
-                         ),),
+                          Text(
+                            'Do have an account?',
+                            style:
+                                TextStyle(fontSize: 16, color: Colors.black54),
+                          ),
                           TextButton(
                               onPressed: () {
                                 Navigator.pushReplacement(
@@ -433,8 +434,10 @@ class _RegisterState extends State<Register> {
                               },
                               child: Text(
                                 'Login',
-                                style:
-                                    TextStyle(color: Colors.blue, fontSize: 20),
+                                style: TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 16,
+                                    decoration: TextDecoration.underline),
                               ))
                         ],
                       ),
