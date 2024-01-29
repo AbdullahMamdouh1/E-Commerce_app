@@ -2,6 +2,7 @@ import 'package:abdullah1/Provider/Cart.dart';
 import 'package:abdullah1/widget/Appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+///////////////////
 
 class CheckOut extends StatelessWidget {
   const CheckOut({Key? key}) : super(key: key);

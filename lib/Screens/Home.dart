@@ -4,6 +4,7 @@ import 'package:abdullah1/Screens/profile.dart';
 import 'package:abdullah1/widget/Appbar.dart';
 import 'package:abdullah1/widget/Item.dart';
 import 'package:abdullah1/widget/color.dart';
+import 'package:abdullah1/widget/imguser.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -38,9 +39,7 @@ class Home extends StatelessWidget {
                     decoration: const BoxDecoration(
                         image: DecorationImage(
                             image: AssetImage('assets/image2.jpg'))),
-                    currentAccountPicture: CircleAvatar(
-                        radius: 55,
-                        backgroundImage:  NetworkImage("${userr.photoURL}")  ),
+                    currentAccountPicture:  GetDataFromFirestoreImgUser(),
                     accountName: Text('Abdullah Mamdouh'),
                     accountEmail: Text('${userr.email}')),
                 const ListTile(

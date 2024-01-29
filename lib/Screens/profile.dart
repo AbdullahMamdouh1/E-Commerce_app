@@ -2,15 +2,22 @@
 
 import 'package:abdullah1/widget/color.dart';
 import 'package:abdullah1/widget/data_from_firestore.dart';
+import 'package:abdullah1/widget/imguser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' show basename;
+import "dart:math";
+
 
 
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -18,6 +25,29 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final credential = FirebaseAuth.instance.currentUser;
+  CollectionReference users = FirebaseFirestore.instance.collection('usersss');
+  //Global variable
+  String? imgName;
+
+
+
+
+  File? imgPath;
+
+  uploadImage() async {
+    final pickedImg = await ImagePicker().pickImage(source: ImageSource.camera);
+    try {
+      if (pickedImg != null) {
+        setState(() {imgPath = File(pickedImg.path);
+        imgName = basename(pickedImg.path);
+        int random = Random().nextInt(9999999);
+        imgName = "$random$imgName";
+
+
+        });
+      } else {print("NO img selected");}
+    } catch (e) {print("Error => $e");}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +80,56 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue
+              
+                ),
+                child: Stack(
+                    children: [
+              
+                      imgPath == null ?      GetDataFromFirestoreImgUser()  :
+
+
+                      ClipOval(
+                        child: Image.file(imgPath!,height: 145,width: 145
+                          ,fit: BoxFit.cover,
+              
+                        ),
+              
+              
+                      ),
+              
+              
+              
+                      Positioned(
+                        bottom: -3,
+                        left: 85,
+                        child: IconButton(onPressed: ()async{
+              
+                        await  uploadImage();
+                        if(imgPath != null){
+                          final storageRef = FirebaseStorage.instance.ref(imgName);
+                          await storageRef.putFile(imgPath!);
+                          String url = await storageRef.getDownloadURL();
+                          users.doc(credential!.uid).update({"imglink": url,});
+                        }
+
+                        }, icon: Icon(Icons.add_a_photo_rounded)),
+                      ),
+              
+                    ]
+              
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 11,
+            ),
+            
             Center(
                 child: Container(
                   padding: EdgeInsets.all(11),

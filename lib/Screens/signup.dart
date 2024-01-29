@@ -8,6 +8,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' show basename;
+import "dart:math";
+
 
 class Register extends StatefulWidget {
   Register({Key? key}) : super(key: key);
@@ -17,6 +23,101 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  //Global variable
+  String? imgName;
+
+
+  File? imgPath;
+
+  uploadImage(dynamic CameraAndGallery) async {
+    final pickedImg = await ImagePicker().pickImage(source: CameraAndGallery);
+    try {
+      if (pickedImg != null) {
+        setState(() {imgPath = File(pickedImg.path);
+        imgName = basename(pickedImg.path);
+        int random = Random().nextInt(9999999);
+        imgName = "$random$imgName";
+
+
+        });
+      } else {print("NO img selected");}
+    } catch (e) {print("Error => $e");}
+
+    Navigator.pop(context);
+  }
+
+
+
+  showModalBottomSheet1(){
+
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(22),
+
+          height:  200,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () async{
+                  await uploadImage( ImageSource.camera);
+
+
+
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.camera),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text("From camera",style: TextStyle(fontSize: 20,color: Colors.black),)
+
+                  ],
+                ),
+              ),
+
+              SizedBox(
+                height: 20,
+              ),
+
+              GestureDetector(
+                onTap: () async{
+                  await  uploadImage(ImageSource.gallery);
+
+
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.photo_album_outlined,),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text("From Gallery",style: TextStyle(fontSize: 20,color: Colors.black),)
+
+                  ],
+                ),
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(fontSize: 22),
+                  ))
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final userNemeController = TextEditingController();
@@ -91,6 +192,12 @@ class _RegisterState extends State<Register> {
         password: passwordController.text,
       );
 
+      // Upload image to firebase storage
+      final storageRef = FirebaseStorage.instance.ref(imgName);
+      await storageRef.putFile(imgPath!);
+      String url = await storageRef.getDownloadURL();
+
+
       CollectionReference users =
           FirebaseFirestore.instance.collection('usersss');
 
@@ -98,6 +205,8 @@ class _RegisterState extends State<Register> {
           .doc(credential.user!.uid)
           .set({
         'username': userNemeController.text,
+        'imglink': url,
+
 
 
           })
@@ -147,6 +256,53 @@ class _RegisterState extends State<Register> {
             padding: EdgeInsets.only(left: 25, top: 60, right: 25),
             child: Column(
               children: [
+
+                Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue
+
+                  ),
+                  child: Stack(
+                    children: [
+
+                      imgPath == null ?
+
+                      CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      radius: 60,
+
+                        backgroundImage: AssetImage("assets/icons/icons8-avatar-.png")
+                    )     :
+                        ClipOval(
+                          child: Image.file(imgPath!,height: 145,width: 145
+                          ,fit: BoxFit.cover,
+
+                          ),
+
+
+                        ),
+
+
+
+                        Positioned(
+                          bottom: -3,
+                          left: 85,
+                          child: IconButton(    onPressed: () {
+                            showModalBottomSheet1();
+
+                          },  icon: Icon(Icons.add_a_photo_rounded)),
+                        ),
+
+                    ]
+
+                  ),
+                ),
+
+
+
+
                 Column(
                   children: [
                     Text(
@@ -163,6 +319,11 @@ class _RegisterState extends State<Register> {
                   child: Column(
                     children: [
                       FromText(
+                        validator: (value) {
+                   if (value == null || value.isEmpty) {
+                           return 'Please enter some text';
+                                }
+                                 return null;},
                         controllerr:userNemeController ,
                         ispassword: true,
                         TextInputTypeee: TextInputType.text,
@@ -381,7 +542,7 @@ class _RegisterState extends State<Register> {
                         width: 350,
                         child: ElevatedButton(
                             onPressed: () async {
-                              if (formKey.currentState!.validate()) {
+                              if (formKey.currentState!.validate() && imgName !=null && imgPath != null) {
                                 await register();
 
                                 if (!mounted) return;

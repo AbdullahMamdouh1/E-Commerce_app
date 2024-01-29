@@ -9,6 +9,7 @@ import 'package:abdullah1/widget/snackBar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
+//////////
 
 class VerifyEmailPage extends StatefulWidget {
   VerifyEmailPage({Key? key}) : super(key: key);
